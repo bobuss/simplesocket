@@ -76,7 +76,7 @@ class RedisClient extends SimpleSocketClient
     {
         // Can't start two pipelines at the same time.
         
-        if ($this->pipeline_history !== false) throw new RedisException('Pipeline mode already in effect.');
+        if ($this->pipeline_history !== false) throw new RedisClientException('Pipeline mode already in effect.');
 
         // Enable pipeline mode, and initialize the history.
         
@@ -98,7 +98,7 @@ class RedisClient extends SimpleSocketClient
             }
             else
             {
-                throw new RedisException('All responses must be read before the pipeline can be closed.');
+                throw new RedisClientException('All responses must be read before the pipeline can be closed.');
             }
         }
         
@@ -212,7 +212,7 @@ class RedisClient extends SimpleSocketClient
     {
         // Make sure we have an array of arguments.
         
-        if (!is_array($args)) throw new RedisException('MSET/HMSET requires an array of arguments.');
+        if (!is_array($args)) throw new RedisClientException('MSET/HMSET requires an array of arguments.');
         
         // Flatten the keys and values together.
         
@@ -285,7 +285,7 @@ class RedisClient extends SimpleSocketClient
         if ($command === false && $args === false && $this->pipeline_history !== false)
         {
             $history = array_shift($this->pipeline_history);
-            if (!$history) throw new RedisException('No more responses in the pipeline.');
+            if (!$history) throw new RedisClientException('No more responses in the pipeline.');
             $command = $history[0];
             $args = $history[1];
         }
@@ -305,7 +305,7 @@ class RedisClient extends SimpleSocketClient
             
             case '-':
                 
-                throw new RedisException($message);
+                throw new RedisClientException($message);
             
             // Status : return true for normal responses, except others which must be kept for post-processing.
             
@@ -370,7 +370,7 @@ class RedisClient extends SimpleSocketClient
                         $header = $this->readline();
                         if ($header[0] !== '$')
                         {
-                            throw new RedisException('Unexpected response from Redis: ' . $header);
+                            throw new RedisClientException('Unexpected response from Redis: ' . $header);
                         }
                         elseif ($header === '$-1')
                         {
@@ -389,7 +389,7 @@ class RedisClient extends SimpleSocketClient
             
             default:
                 
-                throw new RedisException('Unexpected response from Redis: ' . $response);
+                throw new RedisClientException('Unexpected response from Redis: ' . $response);
         }
         
         // If the response needs post-processing, do it here.
@@ -708,4 +708,4 @@ class RedisStream implements Iterator
  * Redis Exception Class.
  */
 
-class RedisException extends Exception { }
+class RedisClientException extends Exception { }
